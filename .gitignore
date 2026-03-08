@@ -17,6 +17,7 @@ infra/terraform/*.tfstate
 infra/terraform/*.tfstate.*
 infra/terraform/crash.log
 infra/terraform/terraform.tfvars
+infra/terraform.exe
 
 # OS
 Thumbs.db

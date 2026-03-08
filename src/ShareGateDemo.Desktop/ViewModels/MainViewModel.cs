@@ -18,7 +18,7 @@ public sealed class MainViewModel : ViewModelBase
 
     public MainViewModel()
     {
-        _apiClient = new ApiClient("http://localhost:5069/");
+        _apiClient = new ApiClient("https://sharegate-demo-api--30rds66.jollybeach-7acd3a8a.canadacentral.azurecontainerapps.io/");
 
         Jobs = new ObservableCollection<MigrationJobDto>();
 

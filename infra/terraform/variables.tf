@@ -7,7 +7,7 @@ variable "name_prefix" {
 variable "location" {
   type        = string
   description = "Azure region."
-  default     = "eastus"
+  default     = "canadacentral"
 }
 
 variable "api_image_name" {
