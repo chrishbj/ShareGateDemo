@@ -46,10 +46,59 @@ You can also override the API at startup with an environment variable:
 $env:ApiBaseUrl = "http://localhost:5069/"
 
 # Azure
-$env:ApiBaseUrl = "https://sharegate-demo-api--0000001.jollybeach-7acd3a8a.canadacentral.azurecontainerapps.io/"
+$env:ApiBaseUrl = "https://sharegate-demo-api.jollybeach-7acd3a8a.canadacentral.azurecontainerapps.io/"
 ```
 
 Note: `setx` affects new terminals only. For current session use `$env:ApiBaseUrl`.
+
+### Environment Switching (Detailed)
+
+Goal: point the desktop app at the correct API (Local or Azure) and make sure the API you expect is the one actually serving `http://localhost:5069`.
+
+#### Switch to Local
+
+1. Ensure MongoDB is running locally on port `27018`:
+```bash
+docker compose -f infra/docker-compose.yml up -d
+```
+
+2. Start the Local API (pick one):
+```bash
+dotnet run --project src/ShareGateDemo.Api
+```
+or
+```bash
+docker build -t sharegate-demo-api:local -f src/ShareGateDemo.Api/Dockerfile .
+docker rm -f sharegate-demo-api-local
+docker run -d --name sharegate-demo-api-local -p 5069:8080 ^
+  -e ASPNETCORE_URLS=http://+:8080 ^
+  -e Mongo__ConnectionString="mongodb://host.docker.internal:27018" ^
+  -e Mongo__Database=sharegate_demo ^
+  sharegate-demo-api:local
+```
+
+3. Open the WPF app, pick **Local** in the dropdown, then click **Use Endpoint**.
+
+4. Quick check:
+```powershell
+Invoke-RestMethod -Uri http://localhost:5069/api/health
+```
+
+#### Switch to Azure
+
+1. Make sure Azure deploy is green (GitHub Actions).
+
+2. Open the WPF app, pick **Azure** in the dropdown, then click **Use Endpoint**.
+
+3. Quick check:
+```powershell
+Invoke-RestMethod -Uri https://sharegate-demo-api.jollybeach-7acd3a8a.canadacentral.azurecontainerapps.io/api/health
+```
+
+#### Troubleshooting Local 404 (Edit/Delete)
+
+If you get `404` on `PUT /api/jobs/{id}/name` or `DELETE /api/jobs/{id}`, you may be hitting an older local API process.
+Make sure only one process is listening on `5069`, and stop any old process before retesting.
 
 ## Azure (Terraform + Container Apps)
 
