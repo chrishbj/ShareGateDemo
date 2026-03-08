@@ -12,6 +12,7 @@ on:
 
 env:
   TF_WORKING_DIR: infra/terraform
+  IMAGE_TAG: ${{ github.sha }}
 
 jobs:
   deploy:
@@ -95,19 +96,20 @@ jobs:
           echo "login_server=$(terraform output -raw acr_login_server)" >> $GITHUB_OUTPUT
           echo "name=$(terraform output -raw acr_name)" >> $GITHUB_OUTPUT
 
+      - name: Override Image Tag (Dispatch Only)
+        if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.image_tag != '' }}
+        run: echo "IMAGE_TAG=${{ github.event.inputs.image_tag }}" >> $GITHUB_ENV
+
       - name: ACR Login
         run: az acr login -n ${{ steps.acr.outputs.name }}
 
       - name: Build and Push Image
         env:
-          IMAGE_TAG: ${{ inputs.image_tag || github.sha }}
           ACR_LOGIN_SERVER: ${{ steps.acr.outputs.login_server }}
         run: |
           docker build -t $ACR_LOGIN_SERVER/sharegate-demo-api:$IMAGE_TAG -f src/ShareGateDemo.Api/Dockerfile .
           docker push $ACR_LOGIN_SERVER/sharegate-demo-api:$IMAGE_TAG
 
       - name: Terraform Apply (Full)
-        env:
-          IMAGE_TAG: ${{ inputs.image_tag || github.sha }}
         working-directory: ${{ env.TF_WORKING_DIR }}
         run: terraform apply -auto-approve -var="api_image_tag=$IMAGE_TAG"
