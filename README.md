@@ -4,7 +4,7 @@ Minimal demo for a WPF desktop app + .NET Web API + MongoDB.
 
 ## Local Run
 
-1. Start MongoDB
+1. Start MongoDB (mapped to host port `27018`)
 ```bash
 docker compose -f infra/docker-compose.yml up -d
 ```
@@ -14,25 +14,31 @@ docker compose -f infra/docker-compose.yml up -d
 dotnet run --project src/ShareGateDemo.Api
 ```
 
-3. Run WPF
+3. Run WPF (either option)
 ```bash
 dotnet run --project src/ShareGateDemo.Desktop
 ```
+```powershell
+Start-Process .\src\ShareGateDemo.Desktop\bin\Debug\net8.0-windows\ShareGateDemo.Desktop.exe
+```
 
-The WPF app expects the API at `http://localhost:5069`.
+Local API default: `http://localhost:5069/`
 
-### WPF API Configuration
+## WPF Endpoint Switching
 
-The desktop app reads `ApiBaseUrl` from `appsettings.json` and can be overridden via env var.
-You can also switch between endpoints from the dropdown in the WPF UI.
+The desktop app loads endpoints from `src/ShareGateDemo.Desktop/appsettings.json` and exposes a dropdown in the UI.
+Click **Use Endpoint** to switch between Local and Azure.
 
-```bash
+You can also override the API at startup with an environment variable:
+```powershell
 # Local
-setx ApiBaseUrl http://localhost:5069/
+$env:ApiBaseUrl = "http://localhost:5069/"
 
 # Azure
-setx ApiBaseUrl https://sharegate-demo-api--0000001.jollybeach-7acd3a8a.canadacentral.azurecontainerapps.io/
+$env:ApiBaseUrl = "https://sharegate-demo-api--0000001.jollybeach-7acd3a8a.canadacentral.azurecontainerapps.io/"
 ```
+
+Note: `setx` affects new terminals only. For current session use `$env:ApiBaseUrl`.
 
 ## Azure (Terraform + Container Apps)
 
@@ -68,3 +74,6 @@ terraform apply -var="api_image_tag=v1"
 ```bash
 terraform output container_app_url
 ```
+
+Current Azure API URL:
+`https://sharegate-demo-api--0000001.jollybeach-7acd3a8a.canadacentral.azurecontainerapps.io/`
