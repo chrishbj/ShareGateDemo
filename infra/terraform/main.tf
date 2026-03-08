@@ -26,7 +26,6 @@ resource "random_string" "suffix" {
 }
 
 locals {
-  storage_account_name = substr(replace(lower("${var.name_prefix}${random_string.suffix.result}"), "-", ""), 0, 24)
   acr_name             = substr(replace(lower("${var.name_prefix}${random_string.suffix.result}"), "-", ""), 0, 22)
 }
 
@@ -51,29 +50,6 @@ resource "azurerm_container_app_environment" "env" {
   log_analytics_workspace_id = azurerm_log_analytics_workspace.law.id
 }
 
-resource "azurerm_storage_account" "mongo" {
-  name                     = local.storage_account_name
-  resource_group_name      = azurerm_resource_group.rg.name
-  location                 = azurerm_resource_group.rg.location
-  account_tier             = "Standard"
-  account_replication_type = "LRS"
-  min_tls_version          = "TLS1_2"
-}
-
-resource "azurerm_storage_share" "mongo" {
-  name                 = "mongo-data"
-  storage_account_name = azurerm_storage_account.mongo.name
-  quota                = 5
-}
-
-resource "azurerm_container_app_environment_storage" "mongo" {
-  name                         = "mongo-storage"
-  container_app_environment_id = azurerm_container_app_environment.env.id
-  account_name                 = azurerm_storage_account.mongo.name
-  share_name                   = azurerm_storage_share.mongo.name
-  access_key                   = azurerm_storage_account.mongo.primary_access_key
-  access_mode                  = "ReadWrite"
-}
 
 resource "azurerm_container_registry" "acr" {
   name                = local.acr_name
@@ -160,8 +136,7 @@ resource "azurerm_container_app" "app" {
 
     volume {
       name         = "mongo-data"
-      storage_name = azurerm_container_app_environment_storage.mongo.name
-      storage_type = "AzureFile"
+      storage_type = "EmptyDir"
     }
   }
 }

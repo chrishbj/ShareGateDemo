@@ -30,12 +30,13 @@ The desktop app reads `ApiBaseUrl` from `appsettings.json` and can be overridden
 setx ApiBaseUrl http://localhost:5069/
 
 # Azure
-setx ApiBaseUrl https://sharegate-demo-api--30rds66.jollybeach-7acd3a8a.canadacentral.azurecontainerapps.io/
+setx ApiBaseUrl https://sharegate-demo-api--0000001.jollybeach-7acd3a8a.canadacentral.azurecontainerapps.io/
 ```
 
 ## Azure (Terraform + Container Apps)
 
 This deploys a single Container App with two containers: the API and a MongoDB sidecar.
+MongoDB uses an `EmptyDir` volume for the demo, so data is not persisted across revisions.
 
 1. Authenticate
 ```bash

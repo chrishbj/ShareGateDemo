@@ -21,7 +21,7 @@
   - Container App Environment
   - ACR
   - Storage (Azure Files) for MongoDB data
-- Show Container App with two containers: API + MongoDB sidecar.
+- Show Container App with two containers: API + MongoDB sidecar (EmptyDir volume for demo).
 - Mention health endpoint `/api/health` and Swagger `/swagger`.
 
 ## 5. Wrap-Up (30s)
