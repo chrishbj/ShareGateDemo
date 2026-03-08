@@ -53,6 +53,11 @@ jobs:
             terraform import -lock-timeout=60s azurerm_container_app_environment.env "$ENV_ID" || true
           fi
 
+          APP_ID="/subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/sharegate-demo-rg/providers/Microsoft.App/containerApps/sharegate-demo-api"
+          if ! echo "$STATE_LIST" | grep -q '^azurerm_container_app\.app$'; then
+            terraform import -lock-timeout=60s azurerm_container_app.app "$APP_ID" || true
+          fi
+
           ACR_NAME=$(az acr list -g sharegate-demo-rg --query '[0].name' -o tsv)
           if [ -n "$ACR_NAME" ]; then
             ACR_ID="/subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/sharegate-demo-rg/providers/Microsoft.ContainerRegistry/registries/$ACR_NAME"
