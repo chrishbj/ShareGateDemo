@@ -36,9 +36,36 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: terraform init -backend-config="resource_group_name=${{ secrets.TF_STATE_RG }}" -backend-config="storage_account_name=${{ secrets.TF_STATE_STORAGE }}" -backend-config="container_name=${{ secrets.TF_STATE_CONTAINER }}" -backend-config="key=${{ secrets.TF_STATE_KEY }}"
+      - name: Terraform Init
         working-directory: ${{ env.TF_WORKING_DIR }}
         run: terraform init -backend-config="resource_group_name=${{ secrets.TF_STATE_RG }}" -backend-config="storage_account_name=${{ secrets.TF_STATE_STORAGE }}" -backend-config="container_name=${{ secrets.TF_STATE_CONTAINER }}" -backend-config="key=${{ secrets.TF_STATE_KEY }}"
+
+      - name: Terraform Import Existing (if needed)
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        run: |
+          set -e
+          if [ -z "$(terraform state list)" ]; then
+            echo "State empty, attempting imports"
+            RG_ID="/subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/sharegate-demo-rg"
+            terraform import azurerm_resource_group.rg "$RG_ID" || true
+
+            LAW_ID="/subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/sharegate-demo-rg/providers/Microsoft.OperationalInsights/workspaces/sharegate-demo-law"
+            terraform import azurerm_log_analytics_workspace.law "$LAW_ID" || true
+
+            ENV_ID="/subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/sharegate-demo-rg/providers/Microsoft.App/managedEnvironments/sharegate-demo-env"
+            terraform import azurerm_container_app_environment.env "$ENV_ID" || true
+
+            ACR_NAME=$(az acr list -g sharegate-demo-rg --query '[0].name' -o tsv)
+            if [ -n "$ACR_NAME" ]; then
+              ACR_ID="/subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/sharegate-demo-rg/providers/Microsoft.ContainerRegistry/registries/$ACR_NAME"
+              terraform import azurerm_container_registry.acr "$ACR_ID" || true
+
+              SUFFIX=${ACR_NAME#sharegatedemo}
+              if [ -n "$SUFFIX" ]; then
+                terraform import random_string.suffix "$SUFFIX" || true
+              fi
+            fi
+          fi
 
       - name: Terraform Apply (Base Infra)
         working-directory: ${{ env.TF_WORKING_DIR }}
