@@ -1,0 +1,23 @@
+# .NET
+bin/
+obj/
+**/bin/
+**/obj/
+.vs/
+
+# User-specific
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Terraform
+infra/terraform/.terraform/
+infra/terraform/*.tfstate
+infra/terraform/*.tfstate.*
+infra/terraform/crash.log
+infra/terraform/terraform.tfvars
+
+# OS
+Thumbs.db
+.DS_Store
