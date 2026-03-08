@@ -44,37 +44,37 @@ jobs:
         working-directory: ${{ env.TF_WORKING_DIR }}
         run: |
           set -e
-          STATE_LIST=$(terraform state list -lock-timeout=60s || true)
+          STATE_LIST=$(terraform state list || true)
           RG_ID="/subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/sharegate-demo-rg"
           if ! echo "$STATE_LIST" | grep -q '^azurerm_resource_group\.rg$'; then
-            terraform import -lock-timeout=60s azurerm_resource_group.rg "$RG_ID" || true
+            terraform import azurerm_resource_group.rg "$RG_ID" || true
           fi
 
           LAW_ID="/subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/sharegate-demo-rg/providers/Microsoft.OperationalInsights/workspaces/sharegate-demo-law"
           if ! echo "$STATE_LIST" | grep -q '^azurerm_log_analytics_workspace\.law$'; then
-            terraform import -lock-timeout=60s azurerm_log_analytics_workspace.law "$LAW_ID" || true
+            terraform import azurerm_log_analytics_workspace.law "$LAW_ID" || true
           fi
 
           ENV_ID="/subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/sharegate-demo-rg/providers/Microsoft.App/managedEnvironments/sharegate-demo-env"
           if ! echo "$STATE_LIST" | grep -q '^azurerm_container_app_environment\.env$'; then
-            terraform import -lock-timeout=60s azurerm_container_app_environment.env "$ENV_ID" || true
+            terraform import azurerm_container_app_environment.env "$ENV_ID" || true
           fi
 
           APP_ID="/subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/sharegate-demo-rg/providers/Microsoft.App/containerApps/sharegate-demo-api"
           if ! echo "$STATE_LIST" | grep -q '^azurerm_container_app\.app$'; then
-            terraform import -lock-timeout=60s azurerm_container_app.app "$APP_ID" || true
+            terraform import azurerm_container_app.app "$APP_ID" || true
           fi
 
           ACR_NAME=$(az acr list -g sharegate-demo-rg --query '[0].name' -o tsv)
           if [ -n "$ACR_NAME" ]; then
             ACR_ID="/subscriptions/${{ secrets.AZURE_SUBSCRIPTION_ID }}/resourceGroups/sharegate-demo-rg/providers/Microsoft.ContainerRegistry/registries/$ACR_NAME"
             if ! echo "$STATE_LIST" | grep -q '^azurerm_container_registry\.acr$'; then
-              terraform import -lock-timeout=60s azurerm_container_registry.acr "$ACR_ID" || true
+              terraform import azurerm_container_registry.acr "$ACR_ID" || true
             fi
 
             SUFFIX=${ACR_NAME#sharegatedemo}
             if [ -n "$SUFFIX" ] && ! echo "$STATE_LIST" | grep -q '^random_string\.suffix$'; then
-              terraform import -lock-timeout=60s random_string.suffix "$SUFFIX" || true
+              terraform import random_string.suffix "$SUFFIX" || true
             fi
           fi
 
