@@ -2,10 +2,6 @@ name: deploy-azure-dispatch
 
 on:
   workflow_dispatch:
-    inputs:
-      image_tag:
-        description: Docker image tag (default: commit SHA)
-        required: false
 
 env:
   TF_WORKING_DIR: infra/terraform
@@ -59,7 +55,7 @@ jobs:
 
       - name: Build and Push Image
         env:
-          IMAGE_TAG: ${{ inputs.image_tag || github.sha }}
+          IMAGE_TAG: ${{ github.sha }}
           ACR_LOGIN_SERVER: ${{ steps.acr.outputs.login_server }}
         run: |
           docker build -t $ACR_LOGIN_SERVER/sharegate-demo-api:$IMAGE_TAG -f src/ShareGateDemo.Api/Dockerfile .
@@ -67,6 +63,6 @@ jobs:
 
       - name: Terraform Apply (Full)
         env:
-          IMAGE_TAG: ${{ inputs.image_tag || github.sha }}
+          IMAGE_TAG: ${{ github.sha }}
         working-directory: ${{ env.TF_WORKING_DIR }}
         run: terraform apply -auto-approve -var="api_image_tag=$IMAGE_TAG"
