@@ -23,12 +23,15 @@ public sealed class MainViewModel : ViewModelBase
 
         Jobs = new ObservableCollection<MigrationJobDto>();
         Endpoints = new ObservableCollection<ApiEndpointOption>(endpoints);
-        SelectedEndpoint = ResolveSelectedEndpoint(apiBaseUrl);
 
         RefreshCommand = new AsyncRelayCommand(RefreshAsync);
         CreateCommand = new AsyncRelayCommand(CreateAsync, CanCreate);
         RunCommand = new AsyncRelayCommand(RunAsync, CanRun);
         SwitchEndpointCommand = new AsyncRelayCommand(SwitchEndpointAsync, CanSwitchEndpoint);
+
+        _selectedEndpoint = ResolveSelectedEndpoint(apiBaseUrl);
+        NotifyPropertyChanged(nameof(SelectedEndpoint));
+        SwitchEndpointCommand.RaiseCanExecuteChanged();
 
         _ = RefreshAsync();
     }
