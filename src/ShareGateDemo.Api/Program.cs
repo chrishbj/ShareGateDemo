@@ -53,6 +53,23 @@ app.MapPost("/api/jobs", async (CreateJobRequest request, MigrationJobRepository
     return Results.Created($"/api/jobs/{created.Id}", created.ToDto());
 });
 
+app.MapPut("/api/jobs/{id}/name", async (string id, UpdateJobNameRequest request, MigrationJobRepository repo) =>
+{
+    if (string.IsNullOrWhiteSpace(request.Name))
+    {
+        return Results.BadRequest(new { error = "Name is required." });
+    }
+
+    var updated = await repo.UpdateNameAsync(id, request.Name);
+    return updated is null ? Results.NotFound() : Results.Ok(updated.ToDto());
+});
+
+app.MapDelete("/api/jobs/{id}", async (string id, MigrationJobRepository repo) =>
+{
+    var deleted = await repo.DeleteAsync(id);
+    return deleted ? Results.NoContent() : Results.NotFound();
+});
+
 app.MapPost("/api/jobs/{id}/run", async (string id, JobRunner runner) =>
 {
     var response = await runner.RunAsync(id);
@@ -132,6 +149,27 @@ sealed class MigrationJobRepository
             .Set(j => j.UpdatedAtUtc, DateTime.UtcNow);
 
         await _collection.UpdateOneAsync(j => j.Id == id, update);
+    }
+
+    public async Task<MigrationJobDocument?> UpdateNameAsync(string id, string name)
+    {
+        var update = Builders<MigrationJobDocument>.Update
+            .Set(j => j.Name, name)
+            .Set(j => j.UpdatedAtUtc, DateTime.UtcNow);
+
+        var result = await _collection.UpdateOneAsync(j => j.Id == id, update);
+        if (result.MatchedCount == 0)
+        {
+            return null;
+        }
+
+        return await GetByIdAsync(id);
+    }
+
+    public async Task<bool> DeleteAsync(string id)
+    {
+        var result = await _collection.DeleteOneAsync(j => j.Id == id);
+        return result.DeletedCount > 0;
     }
 }
 

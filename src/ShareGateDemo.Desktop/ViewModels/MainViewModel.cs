@@ -14,6 +14,7 @@ public sealed class MainViewModel : ViewModelBase
     private string _target = string.Empty;
     private string _note = string.Empty;
     private string _statusMessage = "Ready.";
+    private string _selectedJobName = string.Empty;
     private MigrationJobDto? _selectedJob;
     private ApiEndpointOption? _selectedEndpoint;
 
@@ -27,6 +28,8 @@ public sealed class MainViewModel : ViewModelBase
         RefreshCommand = new AsyncRelayCommand(RefreshAsync);
         CreateCommand = new AsyncRelayCommand(CreateAsync, CanCreate);
         RunCommand = new AsyncRelayCommand(RunAsync, CanRun);
+        UpdateNameCommand = new AsyncRelayCommand(UpdateNameAsync, CanUpdateName);
+        DeleteCommand = new AsyncRelayCommand(DeleteAsync, CanDelete);
         SwitchEndpointCommand = new AsyncRelayCommand(SwitchEndpointAsync, CanSwitchEndpoint);
 
         _selectedEndpoint = ResolveSelectedEndpoint(apiBaseUrl);
@@ -95,6 +98,21 @@ public sealed class MainViewModel : ViewModelBase
             if (SetField(ref _selectedJob, value))
             {
                 RunCommand.RaiseCanExecuteChanged();
+                UpdateNameCommand.RaiseCanExecuteChanged();
+                DeleteCommand.RaiseCanExecuteChanged();
+                SelectedJobName = _selectedJob?.Name ?? string.Empty;
+            }
+        }
+    }
+
+    public string SelectedJobName
+    {
+        get => _selectedJobName;
+        set
+        {
+            if (SetField(ref _selectedJobName, value))
+            {
+                UpdateNameCommand.RaiseCanExecuteChanged();
             }
         }
     }
@@ -102,6 +120,8 @@ public sealed class MainViewModel : ViewModelBase
     public AsyncRelayCommand RefreshCommand { get; }
     public AsyncRelayCommand CreateCommand { get; }
     public AsyncRelayCommand RunCommand { get; }
+    public AsyncRelayCommand UpdateNameCommand { get; }
+    public AsyncRelayCommand DeleteCommand { get; }
     public AsyncRelayCommand SwitchEndpointCommand { get; }
 
     public ApiEndpointOption? SelectedEndpoint
@@ -124,6 +144,8 @@ public sealed class MainViewModel : ViewModelBase
     }
 
     private bool CanRun() => SelectedJob is not null;
+    private bool CanUpdateName() => SelectedJob is not null && !string.IsNullOrWhiteSpace(SelectedJobName);
+    private bool CanDelete() => SelectedJob is not null;
     private bool CanSwitchEndpoint() => SelectedEndpoint is not null;
 
     private async Task RefreshAsync()
@@ -186,6 +208,51 @@ public sealed class MainViewModel : ViewModelBase
         catch (Exception ex)
         {
             StatusMessage = $"Run failed: {ex.Message}";
+        }
+    }
+
+    private async Task UpdateNameAsync()
+    {
+        if (SelectedJob is null)
+        {
+            return;
+        }
+
+        StatusMessage = $"Updating name for '{SelectedJob.Name}'...";
+        try
+        {
+            var updated = await _apiClient.UpdateJobNameAsync(
+                SelectedJob.Id,
+                new UpdateJobNameRequest(SelectedJobName));
+
+            await RefreshAsync();
+            SelectedJob = Jobs.FirstOrDefault(j => j.Id == updated.Id);
+            StatusMessage = "Job name updated.";
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Update failed: {ex.Message}";
+        }
+    }
+
+    private async Task DeleteAsync()
+    {
+        if (SelectedJob is null)
+        {
+            return;
+        }
+
+        StatusMessage = $"Deleting job '{SelectedJob.Name}'...";
+        try
+        {
+            await _apiClient.DeleteJobAsync(SelectedJob.Id);
+            await RefreshAsync();
+            SelectedJob = null;
+            StatusMessage = "Job deleted.";
+        }
+        catch (Exception ex)
+        {
+            StatusMessage = $"Delete failed: {ex.Message}";
         }
     }
 

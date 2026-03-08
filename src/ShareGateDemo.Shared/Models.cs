@@ -23,6 +23,9 @@ public sealed record CreateJobRequest(
     string Target,
     string? Note);
 
+public sealed record UpdateJobNameRequest(
+    string Name);
+
 public sealed record RunJobResponse(
     string Id,
     JobStatus Status);

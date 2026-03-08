@@ -46,4 +46,18 @@ public sealed class ApiClient
         var run = await response.Content.ReadFromJsonAsync<RunJobResponse>(_jsonOptions);
         return run ?? throw new InvalidOperationException("API returned empty run payload.");
     }
+
+    public async Task<MigrationJobDto> UpdateJobNameAsync(string id, UpdateJobNameRequest request)
+    {
+        var response = await _httpClient.PutAsJsonAsync($"api/jobs/{id}/name", request, _jsonOptions);
+        response.EnsureSuccessStatusCode();
+        var updated = await response.Content.ReadFromJsonAsync<MigrationJobDto>(_jsonOptions);
+        return updated ?? throw new InvalidOperationException("API returned empty update payload.");
+    }
+
+    public async Task DeleteJobAsync(string id)
+    {
+        var response = await _httpClient.DeleteAsync($"api/jobs/{id}");
+        response.EnsureSuccessStatusCode();
+    }
 }
