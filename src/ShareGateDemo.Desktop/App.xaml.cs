@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Windows;
 using Microsoft.Extensions.Configuration;
 using ShareGateDemo.Desktop.ViewModels;
@@ -10,6 +11,7 @@ namespace ShareGateDemo.Desktop;
 public partial class App : Application
 {
     private const string DefaultApiBaseUrl = "http://localhost:5069/";
+    private const string DefaultAzureApiUrl = "https://sharegate-demo-api--0000001.jollybeach-7acd3a8a.canadacentral.azurecontainerapps.io/";
 
     protected override void OnStartup(StartupEventArgs e)
     {
@@ -21,6 +23,20 @@ public partial class App : Application
             .AddEnvironmentVariables()
             .Build();
 
+        var endpoints = config.GetSection("ApiEndpoints")
+            .GetChildren()
+            .Select(child => new ApiEndpointOption(
+                child["Name"] ?? "Endpoint",
+                child["Url"] ?? string.Empty))
+            .Where(option => !string.IsNullOrWhiteSpace(option.Url))
+            .ToList();
+
+        if (endpoints.Count == 0)
+        {
+            endpoints.Add(new ApiEndpointOption("Local", DefaultApiBaseUrl));
+            endpoints.Add(new ApiEndpointOption("Azure", DefaultAzureApiUrl));
+        }
+
         var apiBaseUrl = config["ApiBaseUrl"] ?? DefaultApiBaseUrl;
         if (!apiBaseUrl.EndsWith("/", StringComparison.Ordinal))
         {
@@ -29,7 +45,7 @@ public partial class App : Application
 
         var mainWindow = new MainWindow
         {
-            DataContext = new MainViewModel(apiBaseUrl)
+            DataContext = new MainViewModel(apiBaseUrl, endpoints)
         };
         mainWindow.Show();
     }

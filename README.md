@@ -23,7 +23,8 @@ The WPF app expects the API at `http://localhost:5069`.
 
 ### WPF API Configuration
 
-The desktop app reads `ApiBaseUrl` from `appsettings.json` and can be overridden via env var:
+The desktop app reads `ApiBaseUrl` from `appsettings.json` and can be overridden via env var.
+You can also switch between endpoints from the dropdown in the WPF UI.
 
 ```bash
 # Local

@@ -7,7 +7,7 @@ namespace ShareGateDemo.Desktop.ViewModels;
 
 public sealed class MainViewModel : ViewModelBase
 {
-    private readonly ApiClient _apiClient;
+    private ApiClient _apiClient;
 
     private string _jobName = string.Empty;
     private string _source = string.Empty;
@@ -15,21 +15,26 @@ public sealed class MainViewModel : ViewModelBase
     private string _note = string.Empty;
     private string _statusMessage = "Ready.";
     private MigrationJobDto? _selectedJob;
+    private ApiEndpointOption? _selectedEndpoint;
 
-    public MainViewModel(string apiBaseUrl)
+    public MainViewModel(string apiBaseUrl, IReadOnlyList<ApiEndpointOption> endpoints)
     {
         _apiClient = new ApiClient(apiBaseUrl);
 
         Jobs = new ObservableCollection<MigrationJobDto>();
+        Endpoints = new ObservableCollection<ApiEndpointOption>(endpoints);
+        SelectedEndpoint = ResolveSelectedEndpoint(apiBaseUrl);
 
         RefreshCommand = new AsyncRelayCommand(RefreshAsync);
         CreateCommand = new AsyncRelayCommand(CreateAsync, CanCreate);
         RunCommand = new AsyncRelayCommand(RunAsync, CanRun);
+        SwitchEndpointCommand = new AsyncRelayCommand(SwitchEndpointAsync, CanSwitchEndpoint);
 
         _ = RefreshAsync();
     }
 
     public ObservableCollection<MigrationJobDto> Jobs { get; }
+    public ObservableCollection<ApiEndpointOption> Endpoints { get; }
 
     public string JobName
     {
@@ -94,6 +99,19 @@ public sealed class MainViewModel : ViewModelBase
     public AsyncRelayCommand RefreshCommand { get; }
     public AsyncRelayCommand CreateCommand { get; }
     public AsyncRelayCommand RunCommand { get; }
+    public AsyncRelayCommand SwitchEndpointCommand { get; }
+
+    public ApiEndpointOption? SelectedEndpoint
+    {
+        get => _selectedEndpoint;
+        set
+        {
+            if (SetField(ref _selectedEndpoint, value))
+            {
+                SwitchEndpointCommand.RaiseCanExecuteChanged();
+            }
+        }
+    }
 
     private bool CanCreate()
     {
@@ -103,6 +121,7 @@ public sealed class MainViewModel : ViewModelBase
     }
 
     private bool CanRun() => SelectedJob is not null;
+    private bool CanSwitchEndpoint() => SelectedEndpoint is not null;
 
     private async Task RefreshAsync()
     {
@@ -166,4 +185,37 @@ public sealed class MainViewModel : ViewModelBase
             StatusMessage = $"Run failed: {ex.Message}";
         }
     }
+
+    private async Task SwitchEndpointAsync()
+    {
+        if (SelectedEndpoint is null)
+        {
+            return;
+        }
+
+        _apiClient = new ApiClient(SelectedEndpoint.Url);
+        StatusMessage = $"Switched to {SelectedEndpoint.Name}.";
+        await RefreshAsync();
+    }
+
+    private ApiEndpointOption ResolveSelectedEndpoint(string apiBaseUrl)
+    {
+        var normalized = NormalizeUrl(apiBaseUrl);
+        var match = Endpoints.FirstOrDefault(e => NormalizeUrl(e.Url) == normalized);
+        if (match is not null)
+        {
+            return match;
+        }
+
+        var custom = new ApiEndpointOption("Custom", apiBaseUrl);
+        Endpoints.Add(custom);
+        return custom;
+    }
+
+    private static string NormalizeUrl(string url)
+    {
+        return url.Trim().TrimEnd('/').ToLowerInvariant();
+    }
 }
+
+public sealed record ApiEndpointOption(string Name, string Url);
