@@ -1,11 +1,6 @@
 name: deploy-azure
 
 on:
-  workflow_dispatch:
-    inputs:
-      image_tag:
-        description: Docker image tag (default: commit SHA)
-        required: false
   push:
     branches:
       - main
@@ -95,10 +90,6 @@ jobs:
         run: |
           echo "login_server=$(terraform output -raw acr_login_server)" >> $GITHUB_OUTPUT
           echo "name=$(terraform output -raw acr_name)" >> $GITHUB_OUTPUT
-
-      - name: Override Image Tag (Dispatch Only)
-        if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.image_tag != '' }}
-        run: echo "IMAGE_TAG=${{ github.event.inputs.image_tag }}" >> $GITHUB_ENV
 
       - name: ACR Login
         run: az acr login -n ${{ steps.acr.outputs.name }}
