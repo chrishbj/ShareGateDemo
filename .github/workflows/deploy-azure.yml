@@ -36,9 +36,9 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Terraform Init
+      - name: terraform init -backend-config="resource_group_name=${{ secrets.TF_STATE_RG }}" -backend-config="storage_account_name=${{ secrets.TF_STATE_STORAGE }}" -backend-config="container_name=${{ secrets.TF_STATE_CONTAINER }}" -backend-config="key=${{ secrets.TF_STATE_KEY }}"
         working-directory: ${{ env.TF_WORKING_DIR }}
-        run: terraform init
+        run: terraform init -backend-config="resource_group_name=${{ secrets.TF_STATE_RG }}" -backend-config="storage_account_name=${{ secrets.TF_STATE_STORAGE }}" -backend-config="container_name=${{ secrets.TF_STATE_CONTAINER }}" -backend-config="key=${{ secrets.TF_STATE_KEY }}"
 
       - name: Terraform Apply (Base Infra)
         working-directory: ${{ env.TF_WORKING_DIR }}

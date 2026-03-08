@@ -90,6 +90,10 @@ Workflows live in `.github/workflows`:
 Set these in GitHub repo settings:
 
 - `AZURE_CREDENTIALS` (service principal JSON for `azure/login`)
+- `TF_STATE_RG` (resource group for Terraform state)
+- `TF_STATE_STORAGE` (storage account for Terraform state)
+- `TF_STATE_CONTAINER` (blob container for Terraform state)
+- `TF_STATE_KEY` (blob name for Terraform state)
 
 Example deploy run:
 1. Run the **deploy-azure** workflow.
