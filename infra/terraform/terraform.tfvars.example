@@ -1,0 +1,5 @@
+# name_prefix = "sharegate-demo"
+# location = "eastus"
+# api_image_name = "sharegate-demo-api"
+# api_image_tag = "v1"
+# mongo_database = "sharegate_demo"
