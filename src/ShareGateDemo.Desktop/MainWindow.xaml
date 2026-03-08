@@ -27,23 +27,30 @@
             <TextBox Text="{Binding JobName, UpdateSourceTrigger=PropertyChanged}" Margin="0,4,0,12"/>
 
             <TextBlock Text="Source"/>
-            <TextBox Text="{Binding Source, UpdateSourceTrigger=PropertyChanged}" Margin="0,4,0,12"/>
+            <TextBox Text="{Binding Source, UpdateSourceTrigger=PropertyChanged}"
+                     IsEnabled="{Binding IsCreateMode}"
+                     Margin="0,4,0,12"/>
 
             <TextBlock Text="Target"/>
-            <TextBox Text="{Binding Target, UpdateSourceTrigger=PropertyChanged}" Margin="0,4,0,12"/>
+            <TextBox Text="{Binding Target, UpdateSourceTrigger=PropertyChanged}"
+                     IsEnabled="{Binding IsCreateMode}"
+                     Margin="0,4,0,12"/>
 
             <TextBlock Text="Note"/>
-            <TextBox Text="{Binding Note, UpdateSourceTrigger=PropertyChanged}" Margin="0,4,0,12" Height="80" AcceptsReturn="True"/>
+            <TextBox Text="{Binding Note, UpdateSourceTrigger=PropertyChanged}"
+                     IsEnabled="{Binding IsCreateMode}"
+                     Margin="0,4,0,12"
+                     Height="60"
+                     AcceptsReturn="True"/>
 
             <Button Content="Create Job" Command="{Binding CreateCommand}" Height="34" Margin="0,4,0,8"/>
             <Button Content="Refresh" Command="{Binding RefreshCommand}" Height="34" Margin="0,0,0,8"/>
             <Button Content="Run Selected" Command="{Binding RunCommand}" Height="34"/>
 
             <TextBlock FontSize="16" FontWeight="SemiBold" Text="Edit Selected" Margin="0,16,0,8"/>
-            <TextBlock Text="Selected Name"/>
-            <TextBox Text="{Binding SelectedJobName, UpdateSourceTrigger=PropertyChanged}" Margin="0,4,0,8"/>
             <Button Content="Update Name" Command="{Binding UpdateNameCommand}" Height="34" Margin="0,0,0,8"/>
-            <Button Content="Delete Selected" Command="{Binding DeleteCommand}" Height="34"/>
+            <Button Content="Delete Selected" Command="{Binding DeleteCommand}" Height="34" Margin="0,0,0,8"/>
+            <Button Content="New Job" Command="{Binding ClearSelectionCommand}" Height="34"/>
 
             <TextBlock Text="{Binding StatusMessage}" Margin="0,16,0,0" TextWrapping="Wrap"/>
         </StackPanel>
