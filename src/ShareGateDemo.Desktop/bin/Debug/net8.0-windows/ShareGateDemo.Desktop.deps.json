@@ -1,0 +1,39 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v8.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v8.0": {
+      "ShareGateDemo.Desktop/1.0.0": {
+        "dependencies": {
+          "ShareGateDemo.Shared": "1.0.0"
+        },
+        "runtime": {
+          "ShareGateDemo.Desktop.dll": {}
+        }
+      },
+      "ShareGateDemo.Shared/1.0.0": {
+        "runtime": {
+          "ShareGateDemo.Shared.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      }
+    }
+  },
+  "libraries": {
+    "ShareGateDemo.Desktop/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "ShareGateDemo.Shared/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}

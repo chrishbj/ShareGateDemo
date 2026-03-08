@@ -1,0 +1,6 @@
+@ShareGateDemo.Api_HostAddress = http://localhost:5069
+
+GET {{ShareGateDemo.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
