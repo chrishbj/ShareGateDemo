@@ -1,0 +1,72 @@
+name: deploy-azure-dispatch
+
+on:
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: Docker image tag (default: commit SHA)
+        required: false
+
+env:
+  TF_WORKING_DIR: infra/terraform
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Terraform Init
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        run: terraform init
+
+      - name: Terraform Apply (Base Infra)
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        run: |
+          terraform apply -auto-approve \
+            -target="random_string.suffix" \
+            -target="azurerm_resource_group.rg" \
+            -target="azurerm_log_analytics_workspace.law" \
+            -target="azurerm_container_registry.acr" \
+            -target="azurerm_container_app_environment.env"
+
+      - name: Read ACR Info
+        id: acr
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        run: |
+          echo "login_server=$(terraform output -raw acr_login_server)" >> $GITHUB_OUTPUT
+          echo "name=$(terraform output -raw acr_name)" >> $GITHUB_OUTPUT
+
+      - name: ACR Login
+        run: az acr login -n ${{ steps.acr.outputs.name }}
+
+      - name: Build and Push Image
+        env:
+          IMAGE_TAG: ${{ inputs.image_tag || github.sha }}
+          ACR_LOGIN_SERVER: ${{ steps.acr.outputs.login_server }}
+        run: |
+          docker build -t $ACR_LOGIN_SERVER/sharegate-demo-api:$IMAGE_TAG -f src/ShareGateDemo.Api/Dockerfile .
+          docker push $ACR_LOGIN_SERVER/sharegate-demo-api:$IMAGE_TAG
+
+      - name: Terraform Apply (Full)
+        env:
+          IMAGE_TAG: ${{ inputs.image_tag || github.sha }}
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        run: terraform apply -auto-approve -var="api_image_tag=$IMAGE_TAG"
