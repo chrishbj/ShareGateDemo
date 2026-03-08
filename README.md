@@ -14,6 +14,17 @@ docker compose -f infra/docker-compose.yml up -d
 dotnet run --project src/ShareGateDemo.Api
 ```
 
+Or run API via Docker (uses host Mongo on port `27018`):
+```bash
+docker build -t sharegate-demo-api:local -f src/ShareGateDemo.Api/Dockerfile .
+docker rm -f sharegate-demo-api-local
+docker run -d --name sharegate-demo-api-local -p 5069:8080 ^
+  -e ASPNETCORE_URLS=http://+:8080 ^
+  -e Mongo__ConnectionString="mongodb://host.docker.internal:27018" ^
+  -e Mongo__Database=sharegate_demo ^
+  sharegate-demo-api:local
+```
+
 3. Run WPF (either option)
 ```bash
 dotnet run --project src/ShareGateDemo.Desktop
@@ -76,14 +87,14 @@ terraform output container_app_url
 ```
 
 Current Azure API URL:
-`https://sharegate-demo-api--0000001.jollybeach-7acd3a8a.canadacentral.azurecontainerapps.io/`
+`https://sharegate-demo-api.jollybeach-7acd3a8a.canadacentral.azurecontainerapps.io/`
 
 ## CI/CD (GitHub Actions)
 
 Workflows live in `.github/workflows`:
 
 - `ci.yml`: Builds the solution on Windows for every PR/push.
-- `deploy-azure.yml`: Manual deploy to Azure (workflow_dispatch).
+- `deploy-azure.yml`: Deploy to Azure on push to `main`.
 
 ### Required Secrets
 
