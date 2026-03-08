@@ -6,6 +6,9 @@ on:
       image_tag:
         description: Docker image tag (default: commit SHA)
         required: false
+  push:
+    branches:
+      - main
 
 env:
   TF_WORKING_DIR: infra/terraform
