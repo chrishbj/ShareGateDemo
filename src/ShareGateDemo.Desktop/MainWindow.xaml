@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ShareGateDemo.Desktop"
         mc:Ignorable="d"
-        Title="ShareGate Migrate Demo" Height="600" Width="980">
+        Title="ShareGate Migrate Demo" Height="700" Width="980" MinHeight="650">
     <Grid Margin="16">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="280"/>

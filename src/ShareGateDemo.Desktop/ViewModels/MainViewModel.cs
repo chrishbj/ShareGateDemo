@@ -51,6 +51,7 @@ public sealed class MainViewModel : ViewModelBase
             if (SetField(ref _jobName, value))
             {
                 CreateCommand.RaiseCanExecuteChanged();
+                UpdateNameCommand.RaiseCanExecuteChanged();
             }
         }
     }
