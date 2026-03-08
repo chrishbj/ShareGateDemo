@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ShareGateDemo.Desktop"
         mc:Ignorable="d"
-        Title="ShareGate Migrate Demo" Height="700" Width="980" MinHeight="650">
+        Title="ShareGate Migrate Demo" Height="760" Width="980" MinHeight="700">
     <Grid Margin="16">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="280"/>
@@ -47,7 +47,6 @@
             <Button Content="Refresh" Command="{Binding RefreshCommand}" Height="34" Margin="0,0,0,8"/>
             <Button Content="Run Selected" Command="{Binding RunCommand}" Height="34"/>
 
-            <TextBlock FontSize="16" FontWeight="SemiBold" Text="Edit Selected" Margin="0,16,0,8"/>
             <Button Content="Update Name" Command="{Binding UpdateNameCommand}" Height="34" Margin="0,0,0,8"/>
             <Button Content="Delete Selected" Command="{Binding DeleteCommand}" Height="34" Margin="0,0,0,8"/>
             <Button Content="New Job" Command="{Binding ClearSelectionCommand}" Height="34"/>
