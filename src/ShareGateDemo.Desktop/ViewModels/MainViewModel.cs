@@ -16,9 +16,9 @@ public sealed class MainViewModel : ViewModelBase
     private string _statusMessage = "Ready.";
     private MigrationJobDto? _selectedJob;
 
-    public MainViewModel()
+    public MainViewModel(string apiBaseUrl)
     {
-        _apiClient = new ApiClient("https://sharegate-demo-api--30rds66.jollybeach-7acd3a8a.canadacentral.azurecontainerapps.io/");
+        _apiClient = new ApiClient(apiBaseUrl);
 
         Jobs = new ObservableCollection<MigrationJobDto>();
 

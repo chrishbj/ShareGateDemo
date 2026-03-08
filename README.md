@@ -21,6 +21,18 @@ dotnet run --project src/ShareGateDemo.Desktop
 
 The WPF app expects the API at `http://localhost:5069`.
 
+### WPF API Configuration
+
+The desktop app reads `ApiBaseUrl` from `appsettings.json` and can be overridden via env var:
+
+```bash
+# Local
+setx ApiBaseUrl http://localhost:5069/
+
+# Azure
+setx ApiBaseUrl https://sharegate-demo-api--30rds66.jollybeach-7acd3a8a.canadacentral.azurecontainerapps.io/
+```
+
 ## Azure (Terraform + Container Apps)
 
 This deploys a single Container App with two containers: the API and a MongoDB sidecar.
