@@ -77,3 +77,20 @@ terraform output container_app_url
 
 Current Azure API URL:
 `https://sharegate-demo-api--0000001.jollybeach-7acd3a8a.canadacentral.azurecontainerapps.io/`
+
+## CI/CD (GitHub Actions)
+
+Workflows live in `.github/workflows`:
+
+- `ci.yml`: Builds the solution on Windows for every PR/push.
+- `deploy-azure.yml`: Manual deploy to Azure (workflow_dispatch).
+
+### Required Secrets
+
+Set these in GitHub repo settings:
+
+- `AZURE_CREDENTIALS` (service principal JSON for `azure/login`)
+
+Example deploy run:
+1. Run the **deploy-azure** workflow.
+2. Optional input `image_tag` (defaults to commit SHA).
