@@ -1,0 +1,9 @@
+name_prefix   = "sharegate-demo"
+aws_region    = "ca-central-1"
+api_image_tag = "v1"
+mongo_database = "sharegate_demo"
+
+tags = {
+  Project = "ShareGateDemo"
+  Purpose = "InterviewDemo"
+}

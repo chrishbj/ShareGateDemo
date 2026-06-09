@@ -1,0 +1,60 @@
+name: deploy-aws
+
+on:
+  workflow_dispatch:
+
+env:
+  AWS_REGION: ca-central-1
+  TF_WORKING_DIR: infra/aws
+  IMAGE_TAG: ${{ github.sha }}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Terraform Init
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        run: terraform init
+
+      - name: Terraform Apply (ECR)
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        run: terraform apply -auto-approve -target=aws_ecr_repository.api
+
+      - name: Read ECR Repository
+        id: ecr
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        run: echo "repository_url=$(terraform output -raw ecr_repository_url)" >> $GITHUB_OUTPUT
+
+      - name: Login to ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and Push Image
+        env:
+          ECR_REPOSITORY_URL: ${{ steps.ecr.outputs.repository_url }}
+        run: |
+          docker build -t $ECR_REPOSITORY_URL:$IMAGE_TAG -f src/ShareGateDemo.Api/Dockerfile .
+          docker push $ECR_REPOSITORY_URL:$IMAGE_TAG
+
+      - name: Terraform Apply (Full)
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        run: terraform apply -auto-approve -var="api_image_tag=$IMAGE_TAG"
