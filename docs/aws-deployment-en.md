@@ -1,5 +1,7 @@
 # AWS Deployment Design
 
+Related docs: [AWS Deployment Relationship Diagram](aws-architecture-mermaid-en.md)
+
 ## Goal
 This branch ports the backend deployment design from Azure Container Apps to AWS for an interview demo.
 
@@ -96,3 +98,5 @@ For a more production-like AWS design:
 - Add NAT Gateway or VPC endpoints for private egress.
 - Add ACM certificate and Route 53 custom domain.
 - Add autoscaling policies for the ECS service.
+
+
