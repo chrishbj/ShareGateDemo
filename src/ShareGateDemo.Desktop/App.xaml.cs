@@ -15,6 +15,7 @@ public partial class App : Application
 {
     private const string DefaultApiBaseUrl = "http://localhost:5069/";
     private const string DefaultAzureApiUrl = "https://sharegate-demo-api--0000001.jollybeach-7acd3a8a.canadacentral.azurecontainerapps.io/";
+    private const string DefaultAwsApiUrl = "http://sharegate-demo-qjex0i-alb-1455212926.ca-central-1.elb.amazonaws.com/";
 
     public App()
     {
@@ -61,6 +62,7 @@ public partial class App : Application
             {
                 endpoints.Add(new ApiEndpointOption("Local", DefaultApiBaseUrl));
                 endpoints.Add(new ApiEndpointOption("Azure", DefaultAzureApiUrl));
+                endpoints.Add(new ApiEndpointOption("AWS", DefaultAwsApiUrl));
             }
 
             var apiBaseUrl = config["ApiBaseUrl"] ?? DefaultApiBaseUrl;
