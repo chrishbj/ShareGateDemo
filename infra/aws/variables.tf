@@ -4,6 +4,12 @@ variable "name_prefix" {
   default     = "sharegate-demo"
 }
 
+variable "resource_suffix" {
+  type        = string
+  description = "Stable suffix used for AWS demo resources. Keep this fixed after the first deploy to avoid replacing named resources."
+  default     = "qjex0i"
+}
+
 variable "aws_region" {
   type        = string
   description = "AWS region."

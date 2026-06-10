@@ -6,10 +6,6 @@ terraform {
       source  = "hashicorp/aws"
       version = "~> 5.0"
     }
-    random = {
-      source  = "hashicorp/random"
-      version = "~> 3.6"
-    }
   }
 }
 
@@ -17,20 +13,12 @@ provider "aws" {
   region = var.aws_region
 }
 
-resource "random_string" "suffix" {
-  length  = 6
-  upper   = false
-  lower   = true
-  numeric = true
-  special = false
-}
-
 data "aws_availability_zones" "available" {
   state = "available"
 }
 
 locals {
-  name               = "${var.name_prefix}-${random_string.suffix.result}"
+  name               = "${var.name_prefix}-${var.resource_suffix}"
   ecr_repository     = "${var.name_prefix}-api"
   api_container_name = "api"
   api_container_port = 8080
@@ -81,7 +69,7 @@ resource "aws_route_table" "public" {
 }
 
 resource "aws_route_table_association" "public" {
-  count = length(aws_subnet.public)
+  count = 2
 
   subnet_id      = aws_subnet.public[count.index].id
   route_table_id = aws_route_table.public.id
