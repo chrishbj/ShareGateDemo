@@ -15,11 +15,13 @@ public sealed class MainViewModel : ViewModelBase
     private string _note = string.Empty;
     private string _statusMessage = "Ready.";
     private bool _isEditingSelected;
+    private string _currentApiBaseUrl;
     private MigrationJobDto? _selectedJob;
     private ApiEndpointOption? _selectedEndpoint;
 
     public MainViewModel(string apiBaseUrl, IReadOnlyList<ApiEndpointOption> endpoints)
     {
+        _currentApiBaseUrl = NormalizeUrl(apiBaseUrl);
         _apiClient = new ApiClient(apiBaseUrl);
 
         Jobs = new ObservableCollection<MigrationJobDto>();
@@ -176,7 +178,11 @@ public sealed class MainViewModel : ViewModelBase
     }
     private bool CanDelete() => SelectedJob is not null;
     private bool CanClearSelection() => SelectedJob is not null;
-    private bool CanSwitchEndpoint() => SelectedEndpoint is not null;
+    private bool CanSwitchEndpoint()
+    {
+        return SelectedEndpoint is not null
+            && NormalizeUrl(SelectedEndpoint.Url) != _currentApiBaseUrl;
+    }
 
     private async Task RefreshAsync()
     {
@@ -300,8 +306,17 @@ public sealed class MainViewModel : ViewModelBase
             return;
         }
 
+        var selectedUrl = NormalizeUrl(SelectedEndpoint.Url);
+        if (selectedUrl == _currentApiBaseUrl)
+        {
+            StatusMessage = $"Already using {SelectedEndpoint.Name}.";
+            return;
+        }
+
         _apiClient = new ApiClient(SelectedEndpoint.Url);
+        _currentApiBaseUrl = selectedUrl;
         StatusMessage = $"Switched to {SelectedEndpoint.Name}.";
+        SwitchEndpointCommand.RaiseCanExecuteChanged();
         await RefreshAsync();
     }
 

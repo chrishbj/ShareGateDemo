@@ -284,11 +284,13 @@ resource "aws_ecs_task_definition" "api" {
 }
 
 resource "aws_ecs_service" "api" {
-  name            = "${local.name}-api"
-  cluster         = aws_ecs_cluster.main.id
-  task_definition = aws_ecs_task_definition.api.arn
-  desired_count   = 1
-  launch_type     = "FARGATE"
+  name                               = "${local.name}-api"
+  cluster                            = aws_ecs_cluster.main.id
+  task_definition                    = aws_ecs_task_definition.api.arn
+  desired_count                      = 1
+  launch_type                        = "FARGATE"
+  deployment_maximum_percent         = 100
+  deployment_minimum_healthy_percent = 0
 
   network_configuration {
     subnets          = aws_subnet.public[*].id
